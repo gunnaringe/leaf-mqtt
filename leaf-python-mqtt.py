@@ -45,9 +45,9 @@ env = Env(eager=False)
 username = env("NISSAN_USERNAME")
 password = env("NISSAN_PASSWORD")
 nissan_region_code = env("NISSAN_REGION_CODE", default="NE")
-mqtt_host = env("MQTT_HOST")
-mqtt_port = env.int("MQTT_PORT")
-mqtt_secure = env.bool("MQTT_SECURE")
+mqtt_host = env("MQTT_HOST", default="localhost")
+mqtt_port = env.int("MQTT_PORT", default=1883)
+mqtt_secure = env.bool("MQTT_SECURE", default=False)
 mqtt_username = env("MQTT_USERNAME", default="")
 mqtt_password = env("MQTT_PASSWORD", default="")
 mqtt_control_topic = env("MQTT_CONTROL_TOPIC", default="leaf/control")
@@ -112,7 +112,8 @@ client.on_message = on_message
 # Connect to MQTT
 if mqtt_secure:
     client.tls_set()
-client.username_pw_set(mqtt_username, mqtt_password)
+if mqtt_username != "":
+  client.username_pw_set(mqtt_username, mqtt_password)
 client.connect(mqtt_host, mqtt_port, 60)
 client.publish(mqtt_status_topic, "Connecting to MQTT host " + mqtt_host)
 # Non-blocking MQTT subscription loop
