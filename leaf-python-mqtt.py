@@ -73,13 +73,9 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-
-    logging.info(msg.topic+" "+str(msg.payload))
-
     control_subtopic = msg.topic.rsplit('/', 1)[1]
     control_message = msg.payload.decode().strip(' "').lower()
-    logging.info("control sub-topic: " + control_subtopic)
-    logging.info("control message: " + control_message)
+    logging.info("Received message topic=%s message=%s" % (msg.topic, control_message))
 
     # If climate control messaage is received mqtt_control_topic/climate
     if control_subtopic == 'climate':
