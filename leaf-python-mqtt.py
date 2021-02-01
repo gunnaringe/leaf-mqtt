@@ -55,16 +55,14 @@ mqtt_status_topic = env("MQTT_STATUS_TOPIC", default="leaf/status")
 GET_UPDATE_INTERVAL = duration(env("UPDATE_INTERVAL", default="15m"))
 
 try:
-  env.seal()
+    env.seal()
 except EnvError as e:
-  logging.warn(e)
-  quit(1)
+    logging.warn(e)
+    quit(1)
 
 logging.info("updating data from API every %s" % str(GET_UPDATE_INTERVAL))
 
 # The callback for when the client receives a CONNACK response from the server.
-
-
 def on_connect(client, userdata, flags, rc):
     logging.info("Connected to MQTT host " +
                  mqtt_host + " with result code "+str(rc))
@@ -74,14 +72,12 @@ def on_connect(client, userdata, flags, rc):
     client.publish(mqtt_status_topic, "MQTT connected")
 
 # The callback for when a PUBLISH message is received from the server.
-
-
 def on_message(client, userdata, msg):
 
     logging.info(msg.topic+" "+str(msg.payload))
 
     control_subtopic = msg.topic.rsplit('/', 1)[1]
-    control_message = msg.payload
+    control_message = msg.payload.decode().strip(' "').lower()
     logging.info("control sub-topic: " + control_subtopic)
     logging.info("control message: " + control_message)
 
@@ -89,20 +85,19 @@ def on_message(client, userdata, msg):
     if control_subtopic == 'climate':
         logging.info('Climate control command received: ' + control_message)
 
-        if control_message == '1':
+        if control_message == "on":
             climate_control(1)
-
-        if control_message == '0':
+        elif control_message == "off":
             climate_control(0)
+        else:
+          logging.warn("Invalid payload for topic=%s: %s" % msg.topic, control_message)
 
     # If climate control messaage is received on mqtt_control_topic/update
     if control_subtopic == 'update':
         logging.info('Update control command received: ' + control_message)
-        if control_message == '1':
-            leaf_info = get_leaf_update()
-            time.sleep(10)
-            mqtt_publish(leaf_info)
-
+        leaf_info = get_leaf_update()
+        time.sleep(10)
+        mqtt_publish(leaf_info)
 
 client = mqtt.Client()
 # Callback when MQTT is connected
@@ -113,7 +108,7 @@ client.on_message = on_message
 if mqtt_secure:
     client.tls_set()
 if mqtt_username != "":
-  client.username_pw_set(mqtt_username, mqtt_password)
+    client.username_pw_set(mqtt_username, mqtt_password)
 client.connect(mqtt_host, mqtt_port, 60)
 client.publish(mqtt_status_topic, "Connecting to MQTT host " + mqtt_host)
 # Non-blocking MQTT subscription loop
