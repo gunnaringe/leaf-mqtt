@@ -121,17 +121,23 @@ def climate_control(climate_control_instruction):
 
     if climate_control_instruction == 1:
         logging.info("Turning on climate control..wait 60s")
-        result_key = l.start_climate_control()
-        time.sleep(60)
-        start_cc_result = l.get_start_climate_control_result(result_key)
-        logging.info(start_cc_result)
+        try:
+          result_key = l.start_climate_control()
+          time.sleep(60)
+          start_cc_result = l.get_start_climate_control_result(result_key)
+          logging.info(start_cc_result)
+        except:
+          logging.warn("Error while starting climate control")
 
     if climate_control_instruction == 0:
         logging.info("Turning off climate control..wait 60s")
-        result_key = l.stop_climate_control()
-        time.sleep(60)
-        stop_cc_result = l.get_stop_climate_control_result(result_key)
-        logging.info(stop_cc_result)
+        try:
+          result_key = l.stop_climate_control()
+          time.sleep(60)
+          stop_cc_result = l.get_stop_climate_control_result(result_key)
+          logging.info(stop_cc_result)
+        except:
+          logging.warn("Error while stopping climate control")
 
 
 # Request update from car, use carefully: requires car GSM modem to powerup
